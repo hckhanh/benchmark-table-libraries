@@ -10,10 +10,11 @@ Built with **Vite + React 19 + TypeScript + Bun**. Linted and formatted with **o
 | -------------------------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------- |
 | [TanStack Table](https://tanstack.com/table) + [React Virtual](https://tanstack.com/virtual) | 8 / 3   | Headless, DOM-based row virtualization                                |
 | [AG Grid Community](https://www.ag-grid.com/)                                                | 35      | Enterprise-grade, row + column virtualization                         |
-| [MUI X DataGrid](https://mui.com/x/react-data-grid/) (Community)                             | 9       | Built-in row virtualization                                           |
-| [Material React Table](https://www.material-react-table.com/)                                | 3       | TanStack Table + MUI, row + column virtualization                     |
+| [MUI X DataGrid](https://mui.com/x/react-data-grid/) (Community)                             | 9       | Built-in row virtualization (100 rows/page cap in MIT tier)           |
 | [React Data Grid](https://github.com/adazzle/react-data-grid) (Adazzle)                      | 7       | Excel-like, purpose-built virtualization                              |
 | [Glide Data Grid](https://grid.glideapps.com/)                                               | 6       | Canvas-based, designed for millions of rows (themed to match the app) |
+
+> **Material React Table was removed** — its dev/preview bundle hangs the whole page while trying to mount a 1M-row dataset (cell rendering is fully React, no virtualization shortcuts). If you want MRT in the comparison, cap `rowCount` to 50K.
 
 ## Metrics captured
 
@@ -62,7 +63,7 @@ The [React Compiler](https://react.dev/learn/react-compiler) (GA `babel-plugin-r
 
 Most wrappers here are thin passthroughs to pre-compiled library code, so the
 compiler's effective memoization surface is small. It compiles successfully on
-6/8 source files; safe, correct bailouts on two:
+5/7 source files; safe, correct bailouts on two:
 
 - `App.tsx` — shell reads `ref.current` in a scroll callback closure
 - `TanStackTableBench.tsx` — `useReactTable` returns methods compiler refuses to
@@ -91,7 +92,6 @@ src/
     ├── TanStackTableBench.tsx
     ├── AGGridBench.tsx
     ├── MUIDataGridBench.tsx
-    ├── MaterialReactTableBench.tsx
     ├── ReactDataGridBench.tsx
     └── GlideDataGridBench.tsx
 ```
@@ -100,20 +100,37 @@ Each library component is lazy-loaded (`React.lazy`) so switching tabs only ship
 
 ## Sample results
 
-Numbers vary by machine — these are from an Apple Silicon laptop, Chrome, dev build, **1,000,000 rows** cold mount.
+**1,000,000 rows**, production build (`bun run build && bun run preview`), React Compiler OFF.
+Each library was mounted twice in sequence; the first run measures cold mount + first paint, the second warm run measures scroll FPS once the grid is fully painted.
 
-| Library                        | Data gen | Mount | First paint |    JS heap |
-| ------------------------------ | -------: | ----: | ----------: | ---------: |
-| TanStack Table + React Virtual |  ~420 ms |  6 ms |       14 ms |     234 MB |
-| AG Grid Community              |  ~420 ms |  8 ms |       22 ms |     850 MB |
-| MUI X DataGrid                 |  ~420 ms | 12 ms |       30 ms |     680 MB |
-| Material React Table           |  ~420 ms | 15 ms |       38 ms |     720 MB |
-| React Data Grid                |  ~420 ms |  7 ms |       18 ms |     410 MB |
-| Glide Data Grid                |  ~420 ms |  5 ms |       13 ms | **~60 MB** |
+### Benchmark host
 
-Data-gen time is identical across libraries (same generator). Glide's canvas renderer dominates on memory. TanStack Table + React Virtual is the lightest DOM-based option.
+|         |                                   |
+| ------- | --------------------------------- |
+| CPU     | Apple M2 Pro — 10 cores (6P + 4E) |
+| Memory  | 32 GB unified                     |
+| OS      | macOS 26.4.1 (build 25E253)       |
+| Browser | Chrome 147                        |
+| Runtime | Bun 1.3.12 · Vite 8 · React 19.2  |
+| Display | 2764 × 1430 @ DPR 2, 120 Hz       |
 
-Run it yourself for numbers on your hardware — results move significantly between dev / preview / prod builds and CPU throttling settings.
+### Numbers (1M rows, production build, RC off)
+
+| Library                        | Mount | First paint | Scroll FPS | Notes                                                      |
+| ------------------------------ | ----: | ----------: | ---------: | ---------------------------------------------------------- |
+| TanStack Table + React Virtual |  4 ms |       10 ms |         94 | Fully virtualized DOM, light wrapper                       |
+| AG Grid Community              |  5 ms |       13 ms |         18 | Heavy scroll repaint — filters/menus are measured on mount |
+| MUI X DataGrid (Community)     |  8 ms |       16 ms |        120 | Paginated at 100 rows/page (MIT tier cap)                  |
+| React Data Grid (Adazzle)      |  0 ms |       47 ms |         87 | Excel-like grid, fully virtualized                         |
+| Glide Data Grid                |  7 ms |       15 ms |        120 | Canvas renderer, hits display refresh cap                  |
+
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**350 ms** once and is then cached across runs, so it's not per-library.
+
+FPS is capped by the display refresh rate (120 Hz on the test machine), so the 120-FPS ceiling for MUI X and Glide means _"never dropped a frame."_ AG Grid's 18 FPS tells you every scroll tick costs a real DOM pass.
+
+JS heap is omitted from the table — in this benchmark it reports the _cumulative_ Chrome tab size, not the per-library cost (switching libraries reuses the cached dataset and the previous library's chunks stay loaded). To inspect it, open DevTools → Performance Monitor and switch libraries cold.
+
+Run it yourself for numbers on your hardware — results move between dev / preview / prod builds, first vs. warm cache, and CPU throttling. The harness clamps each library to the same 15-column dataset and the same mount/first-paint/scroll protocol so you can compare apples-to-apples.
 
 ## Notes
 

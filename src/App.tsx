@@ -7,11 +7,10 @@ import "./App.css";
 const TanStackTableBench = lazy(() => import("./libraries/TanStackTableBench"));
 const AGGridBench = lazy(() => import("./libraries/AGGridBench"));
 const MUIDataGridBench = lazy(() => import("./libraries/MUIDataGridBench"));
-const MaterialReactTableBench = lazy(() => import("./libraries/MaterialReactTableBench"));
 const ReactDataGridBench = lazy(() => import("./libraries/ReactDataGridBench"));
 const GlideDataGridBench = lazy(() => import("./libraries/GlideDataGridBench"));
 
-type LibKey = "tanstack" | "aggrid" | "mui" | "mrt" | "rdg" | "glide";
+type LibKey = "tanstack" | "aggrid" | "mui" | "rdg" | "glide";
 
 type LibCtx = {
   glideRef: React.RefObject<DataEditorRef | null>;
@@ -52,14 +51,6 @@ const LIBRARIES: Lib[] = [
       "Community (MIT) caps render at 100 rows/page — paginated. Pro/Premium tiers unlock infinite.",
     scrollSelector: ".MuiDataGrid-virtualScroller",
     render: (data: Row[]) => <MUIDataGridBench data={data} />,
-  },
-  {
-    key: "mrt",
-    name: "Material React Table",
-    version: "material-react-table 3",
-    notes: "Wraps TanStack Table + MUI. Row and column virtualization.",
-    scrollSelector: ".MuiTableContainer-root",
-    render: (data: Row[]) => <MaterialReactTableBench data={data} />,
   },
   {
     key: "rdg",
