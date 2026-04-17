@@ -6,10 +6,44 @@ import {
   type GridCell,
   type GridColumn,
   type Item,
+  type Theme,
 } from "@glideapps/glide-data-grid";
 import "@glideapps/glide-data-grid/dist/index.css";
 import type { Row } from "../benchmark/data";
 import { COLUMNS } from "../benchmark/columns";
+
+const DARK_THEME: Partial<Theme> = {
+  accentColor: "#5b9dff",
+  accentFg: "#ffffff",
+  accentLight: "rgba(91, 157, 255, 0.16)",
+  textDark: "#e3e7ef",
+  textMedium: "#b9c0cf",
+  textLight: "#8b93a7",
+  textBubble: "#e3e7ef",
+  bgIconHeader: "#8b93a7",
+  fgIconHeader: "#e3e7ef",
+  textHeader: "#b9c0cf",
+  textGroupHeader: "#b9c0cf",
+  textHeaderSelected: "#ffffff",
+  bgCell: "#11151d",
+  bgCellMedium: "#151a23",
+  bgHeader: "#151a23",
+  bgHeaderHasFocus: "#1c2230",
+  bgHeaderHovered: "#1c2230",
+  bgBubble: "#242b38",
+  bgBubbleSelected: "#2e3649",
+  bgSearchResult: "rgba(251, 191, 36, 0.18)",
+  borderColor: "#242b38",
+  horizontalBorderColor: "rgba(36, 43, 56, 0.5)",
+  drilldownBorder: "#242b38",
+  linkColor: "#7bb0ff",
+  cellHorizontalPadding: 10,
+  cellVerticalPadding: 6,
+  headerFontStyle: "600 11px",
+  baseFontStyle: "12px",
+  fontFamily:
+    "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+};
 
 const GlideDataGridBench = forwardRef<DataEditorRef, { data: Row[] }>(function GlideDataGridBench(
   { data },
@@ -66,6 +100,7 @@ const GlideDataGridBench = forwardRef<DataEditorRef, { data: Row[] }>(function G
         smoothScrollY
         width="100%"
         height="100%"
+        theme={DARK_THEME}
       />
     </div>
   );

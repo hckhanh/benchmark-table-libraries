@@ -13,7 +13,7 @@ Built with **Vite + React 19 + TypeScript + Bun**. Linted and formatted with **o
 | [MUI X DataGrid](https://mui.com/x/react-data-grid/) (Community) | 9 | Built-in row virtualization |
 | [Material React Table](https://www.material-react-table.com/) | 3 | TanStack Table + MUI, row + column virtualization |
 | [React Data Grid](https://github.com/adazzle/react-data-grid) (Adazzle) | 7 | Excel-like, purpose-built virtualization |
-| [Glide Data Grid](https://grid.glideapps.com/) | 6 | Canvas-based, designed for millions of rows |
+| [Glide Data Grid](https://grid.glideapps.com/) | 6 | Canvas-based, designed for millions of rows (themed to match the app) |
 
 ## Metrics captured
 
@@ -31,7 +31,8 @@ Requires [Bun](https://bun.sh/) ≥ 1.0.
 
 ```bash
 bun install
-bun run dev
+bun run dev          # React Compiler OFF (default — baseline benchmark)
+bun run dev:rc       # React Compiler ON
 ```
 
 Open [http://localhost:5173](http://localhost:5173).
@@ -46,9 +47,26 @@ Switching library or row count always resets state so each mount is measured col
 ### Production build
 
 ```bash
-bun run build
+bun run build        # RC off
+bun run build:rc     # RC on
 bun run preview
 ```
+
+### React Compiler (opt-in)
+
+The [React Compiler](https://react.dev/learn/react-compiler) (GA `babel-plugin-react-compiler@1.0.0`) is wired behind a
+`VITE_RC=1` env gate so you can A/B it against the vanilla React 19 runtime.
+
+- Default `dev` / `build` → **compiler OFF** (baseline)
+- `dev:rc` / `build:rc` → **compiler ON** (auto-memoization)
+
+Most wrappers here are thin passthroughs to pre-compiled library code, so the
+compiler's effective memoization surface is small. It compiles successfully on
+6/8 source files; safe, correct bailouts on two:
+
+- `App.tsx` — shell reads `ref.current` in a scroll callback closure
+- `TanStackTableBench.tsx` — `useReactTable` returns methods compiler refuses to
+  memoize (known TanStack Table incompatibility)
 
 ### Quality checks
 
@@ -102,14 +120,20 @@ Run it yourself for numbers on your hardware — results move significantly betw
 - **Strict Mode off** in `main.tsx` — double-rendering would skew first-mount timings.
 - Dataset is cached across runs of the same row count, so a **Re-run** measures library mount only. Switch row count to re-generate.
 - `performance.memory` is a Chromium-only API. In Firefox/Safari the heap metric is hidden.
+- **MUI X DataGrid Community** caps row virtualization at 100 rows per the MIT license, so the 1M dataset is rendered via pagination (100 rows/page). Pro/Premium tiers unlock infinite virtualization.
+- **Glide Data Grid** uses `DataEditorRef.scrollTo` for the FPS measurement because it paints to a canvas, not a scroll container.
+- The `active` boolean column is rendered as a real checkbox in TanStack Table (and natively in MUI DataGrid and Glide) — plain text elsewhere.
 - All columns are plain text/numbers/booleans. Libraries with heavy cell renderers (editable cells, grouping) will look different under that load.
 - Sort, filter, group and edit features were intentionally kept off to isolate raw render and scroll cost.
+- Dependency updates are automated via [Renovate](https://docs.renovatebot.com/) — see [`renovate.json`](renovate.json).
 
 ## Tech stack
 
 - [Vite 8](https://vite.dev) · [React 19](https://react.dev) · [TypeScript 6](https://www.typescriptlang.org/)
 - [Bun](https://bun.sh) for install and scripts
+- [React Compiler](https://react.dev/learn/react-compiler) 1.0 (opt-in via `VITE_RC=1`) wired through [`vite-plugin-babel`](https://github.com/owlsdepartment/vite-plugin-babel)
 - [oxlint](https://oxc.rs/docs/guide/usage/linter) / [oxfmt](https://oxc.rs/docs/guide/usage/formatter) for Rust-speed lint/format
+- [Renovate](https://docs.renovatebot.com/) for weekly dependency PRs, grouped by stack
 
 ## License
 

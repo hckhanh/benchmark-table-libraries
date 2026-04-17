@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:rc": "VITE_RC=1 vite",
     "build": "tsc -b && vite build",
+    "build:rc": "tsc -b && VITE_RC=1 vite build",
     "preview": "vite preview",
     "lint": "oxlint src/",
     "lint:fix": "oxlint --fix src/",
@@ -30,11 +32,13 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@babel/preset-typescript": "^7.28.5",
     "@eslint/js": "^9.39.4",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.39.4",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.5.2",
@@ -43,6 +47,7 @@
     "oxlint": "^1.60.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
-    "vite": "^8.0.4"
+    "vite": "^8.0.4",
+    "vite-plugin-babel": "^1.6.0"
   }
 }

@@ -338,6 +338,13 @@ body {
   text-overflow: ellipsis;
   border-right: 1px solid rgba(36, 43, 56, 0.5);
 }
+.tbl-checkbox {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  cursor: default;
+}
 
 .ag-grid-wrapper {
   --ag-background-color: var(--bg-elev);

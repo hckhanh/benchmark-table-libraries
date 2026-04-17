@@ -9,11 +9,25 @@ const ROW_HEIGHT = 32;
 export default function TanStackTableBench({ data }: { data: Row[] }) {
   const columns = useMemo<ColumnDef<Row>[]>(
     () =>
-      COLUMNS.map((c) => ({
-        accessorKey: c.key,
-        header: c.header,
-        size: c.width,
-      })),
+      COLUMNS.map((c) => {
+        const def: ColumnDef<Row> = {
+          accessorKey: c.key,
+          header: c.header,
+          size: c.width,
+        };
+        if (c.type === "boolean") {
+          def.cell = (ctx) => (
+            <input
+              type="checkbox"
+              checked={ctx.getValue() as boolean}
+              readOnly
+              tabIndex={-1}
+              className="tbl-checkbox"
+            />
+          );
+        }
+        return def;
+      }),
     [],
   );
 

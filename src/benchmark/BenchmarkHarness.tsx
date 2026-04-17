@@ -78,7 +78,8 @@ export default function BenchmarkHarness({
       ? (document.querySelector(scrollContainerSelector) as HTMLElement | null)
       : null;
     if (!container) {
-      alert("No scroll container found for FPS measurement");
+      setResult((r) => (r ? { ...r, scrollFps: 0 } : r));
+      console.warn("[benchmark] scroll container not found for", scrollContainerSelector);
       return;
     }
     container.scrollTop = 0;
