@@ -1,0 +1,53 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":dependencyDashboard",
+    ":prHourlyLimitNone",
+    ":prConcurrentLimit10",
+    "group:allNonMajor",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "labels": ["dependencies"],
+  "rangeStrategy": "bump",
+  "schedule": ["before 5am on monday"],
+  "timezone": "UTC",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"]
+  },
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "matchPackageNames": ["oxlint", "oxfmt"],
+      "groupName": "oxc tooling"
+    },
+    {
+      "matchPackageNames": ["react", "react-dom", "@types/react", "@types/react-dom"],
+      "groupName": "react"
+    },
+    {
+      "matchPackageNames": ["@tanstack/react-table", "@tanstack/react-virtual"],
+      "groupName": "tanstack"
+    },
+    {
+      "matchPackageNames": ["@mui/material", "@mui/x-data-grid", "@emotion/react", "@emotion/styled"],
+      "groupName": "mui stack"
+    },
+    {
+      "matchPackageNames": ["ag-grid-community", "ag-grid-react"],
+      "groupName": "ag grid"
+    },
+    {
+      "matchPackageNames": ["vite", "@vitejs/plugin-react"],
+      "groupName": "vite"
+    }
+  ]
+}
