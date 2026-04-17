@@ -38,7 +38,12 @@
       "groupName": "tanstack"
     },
     {
-      "matchPackageNames": ["@mui/material", "@mui/x-data-grid", "@emotion/react", "@emotion/styled"],
+      "matchPackageNames": [
+        "@mui/material",
+        "@mui/x-data-grid",
+        "@emotion/react",
+        "@emotion/styled"
+      ],
       "groupName": "mui stack"
     },
     {

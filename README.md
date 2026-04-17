@@ -6,14 +6,14 @@ Built with **Vite + React 19 + TypeScript + Bun**. Linted and formatted with **o
 
 ## Libraries compared
 
-| Library | Version | Rendering strategy |
-| --- | --- | --- |
-| [TanStack Table](https://tanstack.com/table) + [React Virtual](https://tanstack.com/virtual) | 8 / 3 | Headless, DOM-based row virtualization |
-| [AG Grid Community](https://www.ag-grid.com/) | 35 | Enterprise-grade, row + column virtualization |
-| [MUI X DataGrid](https://mui.com/x/react-data-grid/) (Community) | 9 | Built-in row virtualization |
-| [Material React Table](https://www.material-react-table.com/) | 3 | TanStack Table + MUI, row + column virtualization |
-| [React Data Grid](https://github.com/adazzle/react-data-grid) (Adazzle) | 7 | Excel-like, purpose-built virtualization |
-| [Glide Data Grid](https://grid.glideapps.com/) | 6 | Canvas-based, designed for millions of rows (themed to match the app) |
+| Library                                                                                      | Version | Rendering strategy                                                    |
+| -------------------------------------------------------------------------------------------- | ------- | --------------------------------------------------------------------- |
+| [TanStack Table](https://tanstack.com/table) + [React Virtual](https://tanstack.com/virtual) | 8 / 3   | Headless, DOM-based row virtualization                                |
+| [AG Grid Community](https://www.ag-grid.com/)                                                | 35      | Enterprise-grade, row + column virtualization                         |
+| [MUI X DataGrid](https://mui.com/x/react-data-grid/) (Community)                             | 9       | Built-in row virtualization                                           |
+| [Material React Table](https://www.material-react-table.com/)                                | 3       | TanStack Table + MUI, row + column virtualization                     |
+| [React Data Grid](https://github.com/adazzle/react-data-grid) (Adazzle)                      | 7       | Excel-like, purpose-built virtualization                              |
+| [Glide Data Grid](https://grid.glideapps.com/)                                               | 6       | Canvas-based, designed for millions of rows (themed to match the app) |
 
 ## Metrics captured
 
@@ -102,14 +102,14 @@ Each library component is lazy-loaded (`React.lazy`) so switching tabs only ship
 
 Numbers vary by machine — these are from an Apple Silicon laptop, Chrome, dev build, **1,000,000 rows** cold mount.
 
-| Library | Data gen | Mount | First paint | JS heap |
-| --- | ---: | ---: | ---: | ---: |
-| TanStack Table + React Virtual | ~420 ms | 6 ms | 14 ms | 234 MB |
-| AG Grid Community | ~420 ms | 8 ms | 22 ms | 850 MB |
-| MUI X DataGrid | ~420 ms | 12 ms | 30 ms | 680 MB |
-| Material React Table | ~420 ms | 15 ms | 38 ms | 720 MB |
-| React Data Grid | ~420 ms | 7 ms | 18 ms | 410 MB |
-| Glide Data Grid | ~420 ms | 5 ms | 13 ms | **~60 MB** |
+| Library                        | Data gen | Mount | First paint |    JS heap |
+| ------------------------------ | -------: | ----: | ----------: | ---------: |
+| TanStack Table + React Virtual |  ~420 ms |  6 ms |       14 ms |     234 MB |
+| AG Grid Community              |  ~420 ms |  8 ms |       22 ms |     850 MB |
+| MUI X DataGrid                 |  ~420 ms | 12 ms |       30 ms |     680 MB |
+| Material React Table           |  ~420 ms | 15 ms |       38 ms |     720 MB |
+| React Data Grid                |  ~420 ms |  7 ms |       18 ms |     410 MB |
+| Glide Data Grid                |  ~420 ms |  5 ms |       13 ms | **~60 MB** |
 
 Data-gen time is identical across libraries (same generator). Glide's canvas renderer dominates on memory. TanStack Table + React Virtual is the lightest DOM-based option.
 
