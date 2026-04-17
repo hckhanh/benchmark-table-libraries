@@ -105,14 +105,18 @@ Each library was mounted twice in sequence; the first run measures cold mount + 
 
 ### Benchmark host
 
-|         |                                   |
-| ------- | --------------------------------- |
-| CPU     | Apple M2 Pro — 10 cores (6P + 4E) |
-| Memory  | 32 GB unified                     |
-| OS      | macOS 26.4.1 (build 25E253)       |
-| Browser | Chrome 147                        |
-| Runtime | Bun 1.3.12 · Vite 8 · React 19.2  |
-| Display | 2764 × 1430 @ DPR 2, 120 Hz       |
+|         |                                                     |
+| ------- | --------------------------------------------------- |
+| Machine | Mac mini 2023 (Mac14,12)                            |
+| SoC     | Apple M2 Pro                                        |
+| CPU     | 10 cores — 6 performance + 4 efficiency             |
+| GPU     | 16-core Apple M2 Pro (Metal 4)                      |
+| Memory  | 32 GB unified LPDDR5                                |
+| Storage | APFS on internal SSD                                |
+| OS      | macOS 26.4.1 (build 25E253)                         |
+| Browser | Chrome 147 (Chromium) — JS heap via Performance API |
+| Runtime | Bun 1.3.12 · Vite 8 · React 19.2 · TypeScript 6     |
+| Display | 2764 × 1430 viewport @ DPR 2, 120 Hz refresh        |
 
 ### Numbers (1M rows, production build, RC off)
 
