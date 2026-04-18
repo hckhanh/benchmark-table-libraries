@@ -125,17 +125,26 @@ Production build with per-library vendor splitting and modern-only output
 first paint captured on the first click of **Run benchmark**. Scroll FPS is
 the warm-run measurement after the grid is fully painted.
 
+Refresh with `bun run bench` — the script below the markers rewrites
+everything between them.
+
+<!-- bench:numbers:start -->
+
+_Last refreshed: 2026-04-18 (via `bun run bench`)._
+
 | Library                        | Mount | First paint | Scroll FPS | Notes                                                      |
 | ------------------------------ | ----: | ----------: | ---------: | ---------------------------------------------------------- |
-| TanStack Table + React Virtual |  0 ms |        8 ms |         69 | Fully virtualized DOM, smallest wrapper                    |
-| AG Grid Community              |  8 ms |       16 ms |         17 | Heavy scroll repaint — filters/menus are measured on mount |
-| MUI X DataGrid (Community)     | 11 ms |       19 ms |        120 | Paginated at 100 rows/page (MIT tier cap)                  |
-| React Data Grid (Adazzle)      |  6 ms |       15 ms |         95 | Excel-like grid, fully virtualized                         |
-| Glide Data Grid                | 12 ms |       17 ms |        117 | Canvas renderer, hits display refresh cap                  |
+| TanStack Table + React Virtual |  1 ms |       10 ms |         76 | Fully virtualized DOM, smallest wrapper                    |
+| AG Grid Community              | 25 ms |       42 ms |         16 | Heavy scroll repaint — filters/menus are measured on mount |
+| MUI X DataGrid (Community)     | 28 ms |       47 ms |         66 | Paginated at 100 rows/page (MIT tier cap)                  |
+| React Data Grid (Adazzle)      | 30 ms |       46 ms |         58 | Excel-like grid, fully virtualized                         |
+| Glide Data Grid                | 38 ms |       55 ms |         57 | Canvas renderer, hits display refresh cap                  |
 
-Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**440 ms** once and is then cached across runs, so it's not per-library.
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**340 ms** once and is then cached across runs, so it's not per-library.
 
-FPS is capped by the display refresh rate (120 Hz on the test machine), so the 120-FPS ceiling for MUI X and Glide means _"never dropped a frame."_ AG Grid's 18 FPS tells you every scroll tick costs a real DOM pass.
+<!-- bench:numbers:end -->
+
+FPS is capped by the frame clock driving the scroller — the interactive 120 Hz display on the test machine, or ~60 Hz inside headless Chrome when `bun run bench` drives the runs. Either way, AG Grid's single-digit-to-teens FPS tells you every scroll tick still costs a real DOM pass.
 
 JS heap is omitted from the table — in this benchmark it reports the _cumulative_ Chrome tab size, not the per-library cost (switching libraries reuses the cached dataset and the previous library's chunks stay loaded). To inspect it, open DevTools → Performance Monitor and switch libraries cold.
 

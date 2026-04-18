@@ -9,6 +9,7 @@
     "build": "tsc -b && vite build",
     "build:rc": "tsc -b && VITE_RC=1 vite build",
     "preview": "vite preview",
+    "bench": "bun run build && bun run scripts/bench.ts",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "format": "oxfmt .",
@@ -39,6 +40,7 @@
     "babel-plugin-react-compiler": "^1.0.0",
     "oxfmt": "^0.45.0",
     "oxlint": "^1.60.0",
+    "puppeteer-core": "^24.41.0",
     "typescript": "~6.0.3",
     "vite": "^8.0.4",
     "vite-plugin-babel": "^1.6.0"

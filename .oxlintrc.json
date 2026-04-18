@@ -15,7 +15,7 @@
     "es2024": true
   },
   "globals": {},
-  "ignorePatterns": ["dist", "node_modules", "**/*.d.ts"],
+  "ignorePatterns": ["dist", "node_modules", "**/*.d.ts", "scripts/**"],
   "rules": {
     "no-unused-vars": "off",
     "typescript/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
