@@ -15,9 +15,9 @@
         "ag-grid-community": "^35.2.1",
         "ag-grid-react": "^35.2.1",
         "marked": "^18.0.1",
-        "react": "^19.2.4",
+        "react": "^19.2.5",
         "react-data-grid": "^7.0.0-beta.59",
-        "react-dom": "^19.2.4",
+        "react-dom": "^19.2.5",
       },
       "devDependencies": {
         "@babel/preset-typescript": "^7.28.5",
