@@ -132,21 +132,21 @@ everything between them.
 
 _Last refreshed: 2026-04-18 (via `bun run bench`)._
 
-| Library | Mount | First paint | rAF FPS | Notes |
-| --- | ---: | ---: | ---: | --- |
-| TanStack Table + React Virtual | 1 ms | 2 ms | 59 | Fully virtualized DOM, smallest wrapper |
-| AG Grid Community | 2 ms | 5 ms | 11 | Heavy scroll repaint — filters/menus are measured on mount |
-| MUI X DataGrid (Community) | 1 ms | 2 ms | 281 | Paginated at 100 rows/page (MIT tier cap) |
-| React Data Grid (Adazzle) | 0 ms | 1 ms | 56 | Excel-like grid, fully virtualized |
-| Glide Data Grid | 0 ms | 1 ms | 265 | Canvas renderer, hits display refresh cap |
+| Library                        | Mount | First paint | rAF FPS | JS heap | Notes                                                      |
+| ------------------------------ | ----: | ----------: | ------: | ------: | ---------------------------------------------------------- |
+| TanStack Table + React Virtual |  1 ms |        2 ms |     135 | 3144 MB | Fully virtualized DOM, smallest wrapper                    |
+| AG Grid Community              |  1 ms |        3 ms |      19 |  640 MB | Heavy scroll repaint — filters/menus are measured on mount |
+| MUI X DataGrid (Community)     |  1 ms |        2 ms |     296 |  340 MB | Paginated at 100 rows/page (MIT tier cap)                  |
+| React Data Grid (Adazzle)      |  1 ms |        2 ms |     127 |  256 MB | Excel-like grid, fully virtualized                         |
+| Glide Data Grid                |  1 ms |        2 ms |     830 |  231 MB | Canvas renderer, hits display refresh cap                  |
 
-Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**807 ms** once and is then cached across runs, so it's not per-library.
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**317 ms** once and is then cached across runs, so it's not per-library.
 
 <!-- bench:numbers:end -->
 
 FPS is capped by the frame clock driving the scroller — the interactive 120 Hz display on the test machine, or ~60 Hz inside headless Chrome when `bun run bench` drives the runs. Either way, AG Grid's single-digit-to-teens FPS tells you every scroll tick still costs a real DOM pass.
 
-JS heap is omitted from the table — in this benchmark it reports the _cumulative_ Chrome tab size, not the per-library cost (switching libraries reuses the cached dataset and the previous library's chunks stay loaded). To inspect it, open DevTools → Performance Monitor and switch libraries cold.
+JS heap is reported per library — `bun run bench` opens a fresh Chrome tab for each library so the measurement reflects that one library's cost (dataset + vendor chunk + React bookkeeping), not everything loaded before it. Chrome is launched with `--enable-precise-memory-info` so the number is un-bucketed. Big disparities here (TanStack multi-GB vs Glide ~230 MB) are real: DOM-virtualized React tables allocate a row-model object per source row plus per-index virtualizer measurements, while Glide paints straight to canvas with no per-row React tree.
 
 Run it yourself for numbers on your hardware — results move between dev / preview / prod builds, first vs. warm cache, and CPU throttling. The harness clamps each library to the same 15-column dataset and the same mount/first-paint/scroll protocol so you can compare apples-to-apples.
 

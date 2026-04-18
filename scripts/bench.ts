@@ -25,6 +25,7 @@ type BenchRow = {
   mountMs: number;
   paintMs: number;
   rafFps: number;
+  heapMB: number;
   note: string;
   gen?: number;
 };
@@ -151,15 +152,26 @@ async function getCompositorFrames(cdp: import("puppeteer-core").CDPSession): Pr
   return frames?.value ?? 0;
 }
 
+async function readHeapMB(page: Page): Promise<number> {
+  const bytes = await page.evaluate(
+    // @ts-expect-error — non-standard Chrome-only API
+    () => (performance.memory?.usedJSHeapSize as number | undefined) ?? 0,
+  );
+  return Math.round(bytes / 1_048_576);
+}
+
 function fmt(n: number): string {
   return `${Math.round(n)} ms`;
 }
 
 function renderTable(rows: BenchRow[]): string {
-  const header = "| Library | Mount | First paint | rAF FPS | Notes |";
-  const align = "| --- | ---: | ---: | ---: | --- |";
+  const header = "| Library | Mount | First paint | rAF FPS | JS heap | Notes |";
+  const align = "| --- | ---: | ---: | ---: | ---: | --- |";
   const body = rows
-    .map((r) => `| ${r.label} | ${fmt(r.mountMs)} | ${fmt(r.paintMs)} | ${r.rafFps} | ${r.note} |`)
+    .map(
+      (r) =>
+        `| ${r.label} | ${fmt(r.mountMs)} | ${fmt(r.paintMs)} | ${r.rafFps} | ${r.heapMB} MB | ${r.note} |`,
+    )
     .join("\n");
   return [header, align, body].join("\n");
 }
@@ -218,38 +230,45 @@ async function main() {
         "--disable-frame-rate-limit",
         "--disable-gpu-vsync",
         "--disable-features=PaintHolding",
+        // Return un-bucketed performance.memory.usedJSHeapSize.
+        "--enable-precise-memory-info",
       ],
       defaultViewport: { width: 1920, height: 1080 },
     });
-    const page = await browser.newPage();
-    const cdp = await page.createCDPSession();
-    await cdp.send("Performance.enable");
-    await page.goto(PREVIEW_URL, { waitUntil: "load" });
-
-    await pickRowCount(page, ROW_LABEL);
-
     const rows: BenchRow[] = [];
     let datasetGenMs = 0;
     for (const lib of LIBRARIES) {
       process.stdout.write(`[bench] ${lib.label}: mount+paint… `);
-      await pickTab(page, lib.tabMatch);
-      const cold = await runOnce(page);
-      if (!datasetGenMs && cold.gen > 100) datasetGenMs = cold.gen;
-      // Warm second run for FPS
-      await sleep(200);
-      await runOnce(page);
-      const { rafFps, compositorFps } = await measureFps(page, cdp);
-      rows.push({
-        label: lib.label,
-        mountMs: cold.mount,
-        paintMs: cold.paint,
-        rafFps,
-        note: lib.note,
-        gen: cold.gen,
-      });
-      console.log(
-        `mount=${cold.mount}ms paint=${cold.paint}ms rafFps=${rafFps} compositorFps=${compositorFps}`,
-      );
+      // Fresh tab per library → heap numbers are isolated, not cumulative.
+      const page = await browser.newPage();
+      const cdp = await page.createCDPSession();
+      await cdp.send("Performance.enable");
+      try {
+        await page.goto(PREVIEW_URL, { waitUntil: "load" });
+        await pickRowCount(page, ROW_LABEL);
+        await pickTab(page, lib.tabMatch);
+        const cold = await runOnce(page);
+        if (!datasetGenMs && cold.gen > 100) datasetGenMs = cold.gen;
+        // Warm second run for FPS
+        await sleep(200);
+        await runOnce(page);
+        const { rafFps, compositorFps } = await measureFps(page, cdp);
+        const heapMB = await readHeapMB(page);
+        rows.push({
+          label: lib.label,
+          mountMs: cold.mount,
+          paintMs: cold.paint,
+          rafFps,
+          heapMB,
+          note: lib.note,
+          gen: cold.gen,
+        });
+        console.log(
+          `mount=${cold.mount}ms paint=${cold.paint}ms rafFps=${rafFps} heap=${heapMB}MB compositorFps=${compositorFps}`,
+        );
+      } finally {
+        await page.close().catch(() => {});
+      }
     }
 
     console.log("[bench] Updating README");
