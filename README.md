@@ -120,15 +120,20 @@ Each library was mounted twice in sequence; the first run measures cold mount + 
 
 ### Numbers (1M rows, production build, RC off)
 
+Production build with per-library vendor splitting and modern-only output
+(`target: esnext`, `modulePreload.polyfill: false`). Cold library mount +
+first paint captured on the first click of **Run benchmark**. Scroll FPS is
+the warm-run measurement after the grid is fully painted.
+
 | Library                        | Mount | First paint | Scroll FPS | Notes                                                      |
 | ------------------------------ | ----: | ----------: | ---------: | ---------------------------------------------------------- |
-| TanStack Table + React Virtual |  4 ms |       10 ms |         94 | Fully virtualized DOM, light wrapper                       |
-| AG Grid Community              |  5 ms |       13 ms |         18 | Heavy scroll repaint — filters/menus are measured on mount |
-| MUI X DataGrid (Community)     |  8 ms |       16 ms |        120 | Paginated at 100 rows/page (MIT tier cap)                  |
-| React Data Grid (Adazzle)      |  0 ms |       47 ms |         87 | Excel-like grid, fully virtualized                         |
-| Glide Data Grid                |  7 ms |       15 ms |        120 | Canvas renderer, hits display refresh cap                  |
+| TanStack Table + React Virtual |  0 ms |        8 ms |         69 | Fully virtualized DOM, smallest wrapper                    |
+| AG Grid Community              |  8 ms |       16 ms |         17 | Heavy scroll repaint — filters/menus are measured on mount |
+| MUI X DataGrid (Community)     | 11 ms |       19 ms |        120 | Paginated at 100 rows/page (MIT tier cap)                  |
+| React Data Grid (Adazzle)      |  6 ms |       15 ms |         95 | Excel-like grid, fully virtualized                         |
+| Glide Data Grid                | 12 ms |       17 ms |        117 | Canvas renderer, hits display refresh cap                  |
 
-Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**350 ms** once and is then cached across runs, so it's not per-library.
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**440 ms** once and is then cached across runs, so it's not per-library.
 
 FPS is capped by the display refresh rate (120 Hz on the test machine), so the 120-FPS ceiling for MUI X and Glide means _"never dropped a frame."_ AG Grid's 18 FPS tells you every scroll tick costs a real DOM pass.
 
