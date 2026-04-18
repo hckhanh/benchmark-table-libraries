@@ -1,0 +1,60 @@
+name: bench
+
+on:
+  schedule:
+    - cron: "0 6 1 */3 *" # 06:00 UTC on the 1st of Jan/Apr/Jul/Oct
+  workflow_dispatch: # manual trigger for ad-hoc refresh
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bench-schedule
+  cancel-in-progress: false
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 1
+
+      # Supply-chain guard — shims npm/bun/bunx/pnpm/yarn; aborts if a
+      # package is malicious or <48h old. Tokenless, no account needed.
+      - name: Install Aikido safe-chain
+        run: |
+          curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/install-safe-chain.sh \
+            | sh -s -- --ci
+          echo "$HOME/.safe-chain/shims" >> "$GITHUB_PATH"
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: browser-actions/setup-chrome@v1
+        id: chrome
+        with:
+          chrome-version: stable
+
+      - name: Install deps (protected by safe-chain)
+        run: bun install --frozen-lockfile
+
+      - name: Run benchmark & update README
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+        run: bun run bench
+
+      - name: Commit & push README refresh
+        run: |
+          if [[ -z "$(git status --porcelain README.md)" ]]; then
+            echo "No README change — skipping commit"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "chore(bench): quarterly refresh $(date -u +%Y-%m-%d)"
+          git push origin HEAD:main
