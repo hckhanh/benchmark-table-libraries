@@ -164,16 +164,62 @@ function fmt(n: number): string {
   return `${Math.round(n)} ms`;
 }
 
+const MEDALS = ["🥇", "🥈", "🥉"] as const;
+const ORDINALS = ["4th", "5th", "6th", "7th", "8th", "9th"];
+
+function positionBadge(rank: number): string {
+  return MEDALS[rank - 1] ?? ORDINALS[rank - 4] ?? `${rank}th`;
+}
+
+function rankRows(rows: BenchRow[]): Map<string, number> {
+  // Per-metric rank (1 = best). Lower-is-better for ms + heap; higher for fps.
+  const perMetricRank = (key: keyof BenchRow, higherBetter: boolean) => {
+    const sorted = [...rows].sort((a, b) => {
+      const av = Number(a[key] ?? 0);
+      const bv = Number(b[key] ?? 0);
+      return higherBetter ? bv - av : av - bv;
+    });
+    const ranks = new Map<string, number>();
+    sorted.forEach((r, i) => ranks.set(r.label, i + 1));
+    return ranks;
+  };
+  const byMount = perMetricRank("mountMs", false);
+  const byPaint = perMetricRank("paintMs", false);
+  const byFps = perMetricRank("rafFps", true);
+  const byHeap = perMetricRank("heapMB", false);
+  const combined = rows
+    .map((r) => ({
+      label: r.label,
+      score:
+        (byMount.get(r.label) ?? 0) +
+        (byPaint.get(r.label) ?? 0) +
+        (byFps.get(r.label) ?? 0) +
+        (byHeap.get(r.label) ?? 0),
+    }))
+    .sort((a, b) => a.score - b.score);
+  const finalRanks = new Map<string, number>();
+  combined.forEach((entry, i) => finalRanks.set(entry.label, i + 1));
+  return finalRanks;
+}
+
 function renderTable(rows: BenchRow[]): string {
-  const header = "| Library | Mount | First paint | rAF FPS | JS heap | Notes |";
-  const align = "| --- | ---: | ---: | ---: | ---: | --- |";
-  const body = rows
-    .map(
-      (r) =>
-        `| ${r.label} | ${fmt(r.mountMs)} | ${fmt(r.paintMs)} | ${r.rafFps} | ${r.heapMB} MB | ${r.note} |`,
-    )
+  const ranks = rankRows(rows);
+  const sorted = [...rows].sort((a, b) => (ranks.get(a.label) ?? 0) - (ranks.get(b.label) ?? 0));
+  const header = "| Rank | Library | Mount | First paint | rAF FPS | JS heap | Notes |";
+  const align = "| :---: | --- | ---: | ---: | ---: | ---: | --- |";
+  const body = sorted
+    .map((r) => {
+      const rank = ranks.get(r.label) ?? 0;
+      return `| ${positionBadge(rank)} | ${r.label} | ${fmt(r.mountMs)} | ${fmt(r.paintMs)} | ${r.rafFps} | ${r.heapMB} MB | ${r.note} |`;
+    })
     .join("\n");
   return [header, align, body].join("\n");
+}
+
+function winnerLine(rows: BenchRow[]): string {
+  const ranks = rankRows(rows);
+  const winner = [...rows].sort((a, b) => (ranks.get(a.label) ?? 0) - (ranks.get(b.label) ?? 0))[0];
+  return winner ? `🏆 **Winner:** ${winner.label}` : "";
 }
 
 function updateReadme(rows: BenchRow[], datasetGenMs: number) {
@@ -193,7 +239,11 @@ function updateReadme(rows: BenchRow[], datasetGenMs: number) {
     "",
     `_Last refreshed: ${generatedAt} (via \`bun run bench\`)._`,
     "",
+    winnerLine(rows),
+    "",
     renderTable(rows),
+    "",
+    `Rank is the sum of per-metric positions across Mount, First paint, rAF FPS (higher = better) and JS heap; lower total wins.`,
     "",
     `Data generation (seeded \`mulberry32\`, 15 columns × 1M rows) takes ~**${Math.round(datasetGenMs)} ms** once and is then cached across runs, so it's not per-library.`,
     "",
