@@ -132,19 +132,19 @@ everything between them.
 
 _Last refreshed: 2026-04-18 (via `bun run bench`)._
 
-🏆 **Winner:** TanStack Table + React Virtual
+🏆 **Winner:** Glide Data Grid
 
 | Rank | Library | Mount | First paint | rAF FPS | JS heap | Notes |
 | :---: | --- | ---: | ---: | ---: | ---: | --- |
-| 🥇 | TanStack Table + React Virtual | 0 ms | 2 ms | 142 | 3152 MB | Fully virtualized DOM, smallest wrapper |
-| 🥈 | MUI X DataGrid (Community) | 1 ms | 2 ms | 279 | 353 MB | Paginated at 100 rows/page (MIT tier cap) |
-| 🥉 | React Data Grid (Adazzle) | 0 ms | 2 ms | 128 | 255 MB | Excel-like grid, fully virtualized |
-| 4th | Glide Data Grid | 1 ms | 2 ms | 822 | 356 MB | Canvas renderer, hits display refresh cap |
-| 5th | AG Grid Community | 1 ms | 3 ms | 19 | 638 MB | Heavy scroll repaint — filters/menus are measured on mount |
+| 🥇 | Glide Data Grid | 2 ms | 2 ms | 251 | 236 MB | Canvas renderer, hits display refresh cap |
+| 🥈 | TanStack Table + React Virtual | 1 ms | 2 ms | 61 | 3022 MB | Fully virtualized DOM, smallest wrapper |
+| 🥉 | MUI X DataGrid (Community) | 26 ms | 27 ms | 349 | 375 MB | Paginated at 100 rows/page (MIT tier cap) |
+| 4th | React Data Grid (Adazzle) | 18 ms | 21 ms | 59 | 258 MB | Excel-like grid, fully virtualized |
+| 5th | AG Grid Community | 14 ms | 16 ms | 10 | 709 MB | Heavy scroll repaint — filters/menus are measured on mount |
 
 Rank is the sum of per-metric positions across Mount, First paint, rAF FPS (higher = better) and JS heap; lower total wins.
 
-Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**335 ms** once and is then cached across runs, so it's not per-library.
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**692 ms** once and is then cached across runs, so it's not per-library.
 
 <!-- bench:numbers:end -->
 
