@@ -1,0 +1,50 @@
+name: check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 1
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: latest
+
+      # Supply-chain guard — shims bun/bunx/npm/yarn/pnpm. Must run AFTER
+      # setup-bun so the shim dir is prepended to $PATH last.
+      - name: Install Aikido safe-chain
+        run: |
+          curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/install-safe-chain.sh \
+            | sh -s -- --ci
+          echo "$HOME/.safe-chain/shims" >> "$GITHUB_PATH"
+
+      - name: Install deps (protected by safe-chain)
+        run: bun install --frozen-lockfile
+
+      - name: Format (oxfmt --check)
+        run: bun run format:check
+
+      - name: Lint (oxlint)
+        run: bun run lint
+
+      - name: Type-check (tsc --noEmit)
+        run: bunx tsc -b --noEmit
+
+      - name: Build (RC off)
+        run: bun run build
