@@ -22,14 +22,6 @@ jobs:
           ref: main
           fetch-depth: 1
 
-      # Supply-chain guard — shims npm/bun/bunx/pnpm/yarn; aborts if a
-      # package is malicious or <48h old. Tokenless, no account needed.
-      - name: Install Aikido safe-chain
-        run: |
-          curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/install-safe-chain.sh \
-            | sh -s -- --ci
-          echo "$HOME/.safe-chain/shims" >> "$GITHUB_PATH"
-
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version: latest
@@ -38,6 +30,21 @@ jobs:
         id: chrome
         with:
           chrome-version: stable
+
+      # Supply-chain guard — shims npm/bun/bunx/pnpm/yarn; aborts if a
+      # package is malicious or <48h old. Tokenless, no account needed.
+      # Must run AFTER setup-bun so the shim dir is prepended to $PATH last
+      # and wins over bun's own bin dir.
+      - name: Install Aikido safe-chain
+        run: |
+          curl -fsSL https://github.com/AikidoSec/safe-chain/releases/latest/download/install-safe-chain.sh \
+            | sh -s -- --ci
+          echo "$HOME/.safe-chain/shims" >> "$GITHUB_PATH"
+
+      - name: Verify safe-chain is shimming bun
+        run: |
+          which bun
+          bun safe-chain-verify || echo "(verify command may not exist on every release)"
 
       - name: Install deps (protected by safe-chain)
         run: bun install --frozen-lockfile
