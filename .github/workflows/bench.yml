@@ -34,7 +34,7 @@ jobs:
         with:
           bun-version: latest
 
-      - uses: browser-actions/setup-chrome@v1
+      - uses: browser-actions/setup-chrome@4f8e94349a351df0f048634f25fec36c3c91eded # v2
         id: chrome
         with:
           chrome-version: stable
