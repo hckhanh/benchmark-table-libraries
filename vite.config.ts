@@ -13,13 +13,24 @@ export default defineConfig({
   define: {
     __RC_ENABLED__: JSON.stringify(RC_ENABLED),
   },
+  css: {
+    // Rust-backed CSS transform + minify. Faster than PostCSS for this app.
+    transformer: "lightningcss",
+    lightningcss: {
+      targets: { chrome: 120 << 16 },
+    },
+    devSourcemap: false,
+  },
   build: {
     target: "esnext",
     cssCodeSplit: true,
+    cssMinify: "lightningcss",
+    minify: "oxc",
     reportCompressedSize: false,
     chunkSizeWarningLimit: 2000,
     modulePreload: { polyfill: false },
     sourcemap: false,
+    assetsInlineLimit: 0,
     rolldownOptions: {
       output: {
         manualChunks(id) {
@@ -63,8 +74,11 @@ export default defineConfig({
       "@mui/x-data-grid",
       "@glideapps/glide-data-grid",
     ],
+    // Start serving before dep crawl finishes — shaves ~200–400 ms off cold dev start.
+    holdUntilCrawlEnd: false,
   },
   server: {
+    fs: { strict: true },
     warmup: {
       clientFiles: [
         "./src/main.tsx",
@@ -73,6 +87,12 @@ export default defineConfig({
         "./src/benchmark/data.ts",
       ],
     },
+  },
+  preview: {
+    // Same preview port the bench script expects.
+    port: 4173,
+    strictPort: true,
+    host: "127.0.0.1",
   },
   plugins: [
     react(),

@@ -24,7 +24,7 @@ type BenchRow = {
   label: string;
   mountMs: number;
   paintMs: number;
-  fps: number;
+  rafFps: number;
   note: string;
   gen?: number;
 };
@@ -124,7 +124,12 @@ async function runOnce(page: Page): Promise<{ gen: number; mount: number; paint:
   throw new Error("Timed out waiting for metrics to appear");
 }
 
-async function measureFps(page: Page): Promise<number> {
+async function measureFps(
+  page: Page,
+  cdp: import("puppeteer-core").CDPSession,
+): Promise<{ rafFps: number; compositorFps: number }> {
+  const frames0 = await getCompositorFrames(cdp);
+  const t0 = Date.now();
   await page.evaluate(() => {
     const btn = [...document.querySelectorAll<HTMLButtonElement>("button")].find((b) =>
       /Measure scroll FPS/.test(b.textContent ?? ""),
@@ -132,9 +137,18 @@ async function measureFps(page: Page): Promise<number> {
     if (btn && !btn.disabled) btn.click();
   });
   await sleep(3400);
+  const frames1 = await getCompositorFrames(cdp);
+  const elapsedSec = (Date.now() - t0) / 1000;
+  const compositorFps = elapsedSec > 0 ? Math.round((frames1 - frames0) / elapsedSec) : 0;
   const mv = await page.$$eval(".metric-value", (nodes) => nodes.map((n) => n.textContent ?? ""));
   const fps = mv.find((x) => /^\d+$/.test(x.trim()));
-  return fps ? Number.parseInt(fps, 10) : 0;
+  return { rafFps: fps ? Number.parseInt(fps, 10) : 0, compositorFps };
+}
+
+async function getCompositorFrames(cdp: import("puppeteer-core").CDPSession): Promise<number> {
+  const { metrics } = await cdp.send("Performance.getMetrics");
+  const frames = metrics.find((m: { name: string; value: number }) => m.name === "Frames");
+  return frames?.value ?? 0;
 }
 
 function fmt(n: number): string {
@@ -142,10 +156,10 @@ function fmt(n: number): string {
 }
 
 function renderTable(rows: BenchRow[]): string {
-  const header = "| Library | Mount | First paint | Scroll FPS | Notes |";
+  const header = "| Library | Mount | First paint | rAF FPS | Notes |";
   const align = "| --- | ---: | ---: | ---: | --- |";
   const body = rows
-    .map((r) => `| ${r.label} | ${fmt(r.mountMs)} | ${fmt(r.paintMs)} | ${r.fps} | ${r.note} |`)
+    .map((r) => `| ${r.label} | ${fmt(r.mountMs)} | ${fmt(r.paintMs)} | ${r.rafFps} | ${r.note} |`)
     .join("\n");
   return [header, align, body].join("\n");
 }
@@ -194,14 +208,22 @@ async function main() {
     console.log(`[bench] Waiting for preview at ${PREVIEW_URL}`);
     await waitForServer(PREVIEW_URL);
 
-    console.log("[bench] Launching headless Chrome");
+    console.log("[bench] Launching headless Chrome (rAF + vsync unlocked)");
     browser = await puppeteer.launch({
       executablePath: chromePath,
       headless: true,
-      args: ["--no-sandbox"],
+      args: [
+        "--no-sandbox",
+        // Remove display / compositor frame-rate cap so rAF measures raw work.
+        "--disable-frame-rate-limit",
+        "--disable-gpu-vsync",
+        "--disable-features=PaintHolding",
+      ],
       defaultViewport: { width: 1920, height: 1080 },
     });
     const page = await browser.newPage();
+    const cdp = await page.createCDPSession();
+    await cdp.send("Performance.enable");
     await page.goto(PREVIEW_URL, { waitUntil: "load" });
 
     await pickRowCount(page, ROW_LABEL);
@@ -216,16 +238,18 @@ async function main() {
       // Warm second run for FPS
       await sleep(200);
       await runOnce(page);
-      const fps = await measureFps(page);
+      const { rafFps, compositorFps } = await measureFps(page, cdp);
       rows.push({
         label: lib.label,
         mountMs: cold.mount,
         paintMs: cold.paint,
-        fps,
+        rafFps,
         note: lib.note,
         gen: cold.gen,
       });
-      console.log(`mount=${cold.mount}ms paint=${cold.paint}ms fps=${fps}`);
+      console.log(
+        `mount=${cold.mount}ms paint=${cold.paint}ms rafFps=${rafFps} compositorFps=${compositorFps}`,
+      );
     }
 
     console.log("[bench] Updating README");
