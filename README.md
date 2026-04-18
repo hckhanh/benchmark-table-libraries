@@ -134,13 +134,13 @@ _Last refreshed: 2026-04-18 (via `bun run bench`)._
 
 | Library | Mount | First paint | rAF FPS | Notes |
 | --- | ---: | ---: | ---: | --- |
-| TanStack Table + React Virtual | 1 ms | 89 ms | 143 | Fully virtualized DOM, smallest wrapper |
-| AG Grid Community | 0 ms | 1 ms | 19 | Heavy scroll repaint — filters/menus are measured on mount |
-| MUI X DataGrid (Community) | 1 ms | 2 ms | 290 | Paginated at 100 rows/page (MIT tier cap) |
-| React Data Grid (Adazzle) | 1 ms | 2 ms | 133 | Excel-like grid, fully virtualized |
-| Glide Data Grid | 0 ms | 1 ms | 818 | Canvas renderer, hits display refresh cap |
+| TanStack Table + React Virtual | 1 ms | 2 ms | 59 | Fully virtualized DOM, smallest wrapper |
+| AG Grid Community | 2 ms | 5 ms | 11 | Heavy scroll repaint — filters/menus are measured on mount |
+| MUI X DataGrid (Community) | 1 ms | 2 ms | 281 | Paginated at 100 rows/page (MIT tier cap) |
+| React Data Grid (Adazzle) | 0 ms | 1 ms | 56 | Excel-like grid, fully virtualized |
+| Glide Data Grid | 0 ms | 1 ms | 265 | Canvas renderer, hits display refresh cap |
 
-Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**341 ms** once and is then cached across runs, so it's not per-library.
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**807 ms** once and is then cached across runs, so it's not per-library.
 
 <!-- bench:numbers:end -->
 
