@@ -7,7 +7,7 @@
  * Usage: `bun run bench`
  * Requires Google Chrome installed; override path with CHROME_PATH env var.
  */
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import path from "node:path";
@@ -251,6 +251,10 @@ function updateReadme(rows: BenchRow[], datasetGenMs: number) {
   ].join("\n");
   const next = `${before}${block}${after}`;
   writeFileSync(README_PATH, next, "utf8");
+  const fmt = spawnSync("bunx", ["oxfmt", README_PATH], { stdio: "inherit" });
+  if (fmt.status !== 0) {
+    throw new Error(`oxfmt failed on README.md (exit ${fmt.status})`);
+  }
 }
 
 async function main() {
