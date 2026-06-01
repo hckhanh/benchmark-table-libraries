@@ -27,14 +27,14 @@
     "ag-grid-community": "^35.2.1",
     "ag-grid-react": "^35.2.1",
     "marked": "^18.0.1",
-    "react": "^19.2.5",
+    "react": "^19.2.7",
     "react-data-grid": "^7.0.0-beta.59",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.7"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.28.5",
     "@types/node": "^24.12.2",
-    "@types/react": "^19.2.14",
+    "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
