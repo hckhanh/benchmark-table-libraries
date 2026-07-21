@@ -26,24 +26,24 @@
     "@tanstack/react-virtual": "^3.13.24",
     "ag-grid-community": "^35.2.1",
     "ag-grid-react": "^35.2.1",
-    "marked": "^18.0.1",
+    "marked": "^18.0.7",
     "react": "^19.2.5",
-    "react-data-grid": "^7.0.0-beta.59",
+    "react-data-grid": "^7.0.0-beta.61",
     "react-dom": "^19.2.5"
   },
   "devDependencies": {
-    "@babel/preset-typescript": "^7.28.5",
-    "@types/node": "^24.12.2",
+    "@babel/preset-typescript": "^7.29.7",
+    "@types/node": "^24.13.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "babel-plugin-react-compiler": "^1.0.0",
-    "lightningcss": "^1.32.0",
+    "lightningcss": "^1.33.0",
     "oxfmt": "^0.57.0",
     "oxlint": "^1.72.0",
-    "puppeteer-core": "^24.41.0",
+    "puppeteer-core": "^24.43.1",
     "typescript": "~6.0.3",
     "vite": "^8.0.10",
-    "vite-plugin-babel": "^1.6.0"
+    "vite-plugin-babel": "^1.7.3"
   }
 }
