@@ -23,7 +23,7 @@
     "@mui/material": "^9.0.0",
     "@mui/x-data-grid": "^9.0.2",
     "@tanstack/react-table": "^8.21.3",
-    "@tanstack/react-virtual": "^3.13.24",
+    "@tanstack/react-virtual": "^3.14.8",
     "ag-grid-community": "^35.2.1",
     "ag-grid-react": "^35.2.1",
     "marked": "^18.0.1",
