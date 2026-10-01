@@ -130,21 +130,21 @@ everything between them.
 
 <!-- bench:numbers:start -->
 
-_Last refreshed: 2026-07-01 (via `bun run bench`)._
+_Last refreshed: 2026-10-01 (via `bun run bench`)._
 
-🏆 **Winner:** Glide Data Grid
+🏆 **Winner:** MUI X DataGrid (Community)
 
 | Rank | Library                        | Mount | First paint | rAF FPS | JS heap | Notes                                                      |
 | :--: | ------------------------------ | ----: | ----------: | ------: | ------: | ---------------------------------------------------------- |
-|  🥇  | Glide Data Grid                |  1 ms |        2 ms |     289 |  232 MB | Canvas renderer, hits display refresh cap                  |
-|  🥈  | TanStack Table + React Virtual |  1 ms |        2 ms |      17 | 2942 MB | Fully virtualized DOM, smallest wrapper                    |
-|  🥉  | AG Grid Community              |  1 ms |        2 ms |      10 |  670 MB | Heavy scroll repaint — filters/menus are measured on mount |
-| 4th  | MUI X DataGrid (Community)     |  2 ms |        3 ms |     437 |  372 MB | Paginated at 100 rows/page (MIT tier cap)                  |
-| 5th  | React Data Grid (Adazzle)      |  1 ms |        3 ms |      65 |  261 MB | Excel-like grid, fully virtualized                         |
+|  🥇  | MUI X DataGrid (Community)     |  1 ms |        3 ms |     364 |  360 MB | Paginated at 100 rows/page (MIT tier cap)                  |
+|  🥈  | AG Grid Community              |  1 ms |        3 ms |      11 |  694 MB | Heavy scroll repaint — filters/menus are measured on mount |
+|  🥉  | Glide Data Grid                |  2 ms |        3 ms |     281 |  232 MB | Canvas renderer, hits display refresh cap                  |
+| 4th  | React Data Grid (Adazzle)      |  1 ms |        3 ms |      63 |  247 MB | Excel-like grid, fully virtualized                         |
+| 5th  | TanStack Table + React Virtual |  3 ms |        4 ms |      63 | 3016 MB | Fully virtualized DOM, smallest wrapper                    |
 
 Rank is the sum of per-metric positions across Mount, First paint, rAF FPS (higher = better) and JS heap; lower total wins.
 
-Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**705 ms** once and is then cached across runs, so it's not per-library.
+Data generation (seeded `mulberry32`, 15 columns × 1M rows) takes ~**768 ms** once and is then cached across runs, so it's not per-library.
 
 <!-- bench:numbers:end -->
 
